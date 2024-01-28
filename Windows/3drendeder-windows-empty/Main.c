@@ -2,56 +2,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <SDL.h>
+#include "Display.h"
+#include "vector.h"
 
+#define N_POINTS (9 * 9 * 9)
+
+vec3_t cameraPosition = {0, 0, -5};
+
+vec3_t cubePoints[N_POINTS];
+vec2_t projectedPoints[N_POINTS];
+
+float fovFactor = 640;
 
 bool isRunning;
-
-SDL_Window* window;
-SDL_Renderer* renderer;
-
-uint32_t* colorBuffer = NULL;
-SDL_Texture* colorBufferTexture = NULL;
-
-int windowWidth = 800;
-int windowHeight = 600;
-
-bool initializeWindow(void)
-{
-  if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
-  {
-    fprintf(stderr, "ERROR INITIALIZING SDL\n");
-    return false;
-  }
-
-  SDL_DisplayMode displayMode;
-  SDL_GetCurrentDisplayMode(0, &displayMode);
-  
-  windowWidth = displayMode.w;
-  windowHeight = displayMode.h;
-
-  window = SDL_CreateWindow(NULL, 
-                            SDL_WINDOWPOS_CENTERED,
-                            SDL_WINDOWPOS_CENTERED,
-                            windowWidth,
-                            windowHeight,
-                            SDL_WINDOW_BORDERLESS);
-  if (!window)
-  {
-    fprintf(stderr, "ERROR CREATING SDL WINDOW\n");
-    return false;
-  }
-
-  renderer = SDL_CreateRenderer(window, -1, 0);
-
-  if (!renderer)
-  {
-    fprintf(stderr, "ERROR CREATING SDL RENDERER\n");
-    return false;
-  }
-
-  SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-  return true;
-}
 
 bool setup(void)
 {
@@ -66,6 +29,21 @@ bool setup(void)
     fprintf(stderr, "ERROR SETTING UP COLOR BUFFER");
     return false;
   }
+
+  int pointCount = 0;
+
+  for (float x = -1; x <= 1; x += 0.25)
+  {
+    for (float y = -1; y <= 1; y += 0.25)
+    {
+      for (float z = -1; z <= 1; z += 0.25)
+      {
+        vec3_t newPoint = {.x = x, .y = y, .z = z};
+        cubePoints[pointCount++] = newPoint;
+      }
+    }
+  }
+  
   return true;
 }
 
@@ -88,79 +66,66 @@ void processInput(void)
   }
 }
 
+vec2_t Project(vec3_t point)
+{
+  vec2_t projectedPoint = {
+    .x = (fovFactor * point.x) / point.z,
+    .y = (fovFactor * point.y) / point.z
+  };
+
+  return projectedPoint;
+}
 
 void update(void)
 {
-
-}
-
-void DrawGrid(void)
-{
-  for (int y = 0; y < windowHeight; y+= 10)
+  for (int i = 0; i < N_POINTS; i++)
   {
-    for (int x = 0; x < windowWidth; x+=10)
-    {
-      //if(y % 10 == 0 || x%10 == 0)
-        colorBuffer[(windowWidth * y) + x] = 0xFFFFFF00;
-    }
-  }
-}
+    vec3_t point = cubePoints[i];
+    point.z -= cameraPosition.z;
 
-void DrawRectangle(int width, int height, int x, int y, uint32_t color)
-{
-  for (int i = y; i < height + y; i++)
-  {
-    for (int j = x; j < width + x; j++)
-    {
-      colorBuffer[(windowWidth * i) + j] = color;
-    }
-  }
-}
-
-void renderColorBuffer(void)
-{
-  SDL_UpdateTexture(colorBufferTexture, NULL, colorBuffer, (int)(windowWidth *sizeof(uint32_t)));
-  SDL_RenderCopy(renderer, colorBufferTexture, NULL, NULL);
-}
-
-void clearColorBuffer(uint32_t color)
-{
-  for (int y = 0; y < windowHeight; y++)
-  {
-    for (int x = 0; x < windowWidth; x++)
-    {
-      colorBuffer[(windowWidth * y) + x] = color;
-    }
+    vec2_t projectedPoint = Project(point);
+    projectedPoints[i] = projectedPoint;
   }
 }
 
 void render(void)
 { 
-  SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+  /*SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
   SDL_RenderClear(renderer);
-
+  */
   DrawGrid();
-  DrawRectangle(300, 150, 300, 200, 0xFFFF00FF);
-  renderColorBuffer();
-  clearColorBuffer(0x00000000);
 
+  for (int i = 0; i < N_POINTS; i++)
+  {
+    vec2_t projectedPoint = projectedPoints[i];
+    DrawRectangle(projectedPoint.x + (windowWidth / 2),
+                  projectedPoint.y + (windowHeight / 2), 
+                  4,
+                  4, 
+                  0xFFFFFF00
+                  );
+  }
+
+  /*DrawPixel(20, 20, 0xFFFF0000);
+  
+  DrawRectangle(300, 150, 300, 200, 0xFFFF00FF);*/
+  
+  renderColorBuffer();
+
+  clearColorBuffer(0xFF000000);
   
   SDL_RenderPresent(renderer);
 }
 
-void destroyWindow(void)
-{
-  free(colorBuffer);
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
-}
+
 
 int main(int argc, char* args[])
 {
   isRunning = initializeWindow();
   
-  isRunning = setup();
+  setup();
+  
+  vec3_t myVector = { 1.0, 2.5, 3.0 };
 
   while (isRunning)
   {
