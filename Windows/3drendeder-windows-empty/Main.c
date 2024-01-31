@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <SDL.h>
+#include "Array.h"
 #include "Display.h"
 #include "Vector.h"
 #include "Mesh.h"
@@ -9,9 +10,11 @@
 //#define N_POINTS (9 * 9 * 9)
 
 vec3_t cameraPosition = {0, 0, -5};
-vec3_t cubeRotation = {0, 0, 0};
+//vec3_t cubeRotation = {0, 0, 0};
 
-triangle_t trianglesToRender [N_MESH_FACES];
+triangle_t* trianglesToRender = NULL;
+
+//triangle_t trianglesToRender [N_MESH_FACES];
 
 //vec3_t cubePoints[N_POINTS];
 //vec2_t projectedPoints[N_POINTS];
@@ -34,7 +37,8 @@ bool setup(void)
     fprintf(stderr, "ERROR SETTING UP COLOR BUFFER");
     return false;
   }
-
+  
+  LoadCubeMeshData();
   /*int pointCount = 0;
 
   for (float x = -1; x <= 1; x += 0.25)
@@ -93,28 +97,31 @@ void update(void)
   //while(!SDL_TICKS_PASSED(SDL_GetTicks(), previousFrameTime + FRAME_TARGET_TIME));
 
   previousFrameTime = SDL_GetTicks();
-
-  cubeRotation.x += 0.01;
-  cubeRotation.y += 0.01;
-  cubeRotation.z += 0.01;
-
-  for (int i = 0; i < N_MESH_FACES; i++)
+  
+  trianglesToRender = NULL;  
+  
+  mesh.rotation.x += 0.01;
+  mesh.rotation.y += 0.01;
+  mesh.rotation.z += 0.01;
+  
+  int numFaces = ArrayLength(mesh.faces);
+  for (int i = 0; i < numFaces; i++)
   {
-    face_t meshFace = meshFaces[i];
+    face_t meshFace = mesh.faces[i];
     
     vec3_t faceVertices[3];
-    faceVertices[0] = meshVertices[meshFace.a - 1];
-    faceVertices[1] = meshVertices[meshFace.b - 1];
-    faceVertices[2] = meshVertices[meshFace.c - 1];
+    faceVertices[0] = mesh.vertices[meshFace.a - 1];
+    faceVertices[1] = mesh.vertices[meshFace.b - 1];
+    faceVertices[2] = cubeVertices[meshFace.c - 1];
     
     triangle_t projectedTriangle;
 
     for (int j = 0; j < 3; j++)
     {
         vec3_t transfomedVertex = faceVertices[j];
-        transfomedVertex = Vec3RotateX(transfomedVertex, cubeRotation.x);
-        transfomedVertex = Vec3RotateY(transfomedVertex, cubeRotation.y);
-        transfomedVertex = Vec3RotateZ(transfomedVertex, cubeRotation.z);
+        transfomedVertex = Vec3RotateX(transfomedVertex, mesh.rotation.x);
+        transfomedVertex = Vec3RotateY(transfomedVertex, mesh.rotation.y);
+        transfomedVertex = Vec3RotateZ(transfomedVertex, mesh.rotation.z);
         
         transfomedVertex.z -= cameraPosition.z;
 
@@ -127,7 +134,8 @@ void update(void)
     }
     
     //Save the projected triangles to render
-    trianglesToRender[i] = projectedTriangle;
+    //trianglesToRender[i] = projectedTriangle;
+    ArrayPush(trianglesToRender, projectedTriangle);
   }
 
   /*for (int i = 0; i < N_POINTS; i++)
@@ -151,13 +159,23 @@ void render(void)
   SDL_RenderClear(renderer);
   */
   DrawGrid();
-  
-  for (int i = 0; i < N_MESH_FACES; i++)
+
+  int meshTrianglesSize = ArrayLength(trianglesToRender);
+
+  for (int i = 0; i < meshTrianglesSize; i++)
   {
     triangle_t triangle = trianglesToRender[i];
     DrawRectangle(triangle.points[0].x, triangle.points[0].y, 3, 3, 0xFFFFFF00);
     DrawRectangle(triangle.points[1].x, triangle.points[1].y, 3, 3, 0xFFFFFF00);
     DrawRectangle(triangle.points[2].x, triangle.points[2].y, 3, 3, 0xFFFFFF00);
+
+    DrawTriangle(triangle.points[0].x, 
+                 triangle.points[0].y, 
+                 triangle.points[1].x, 
+                 triangle.points[1].y, 
+                 triangle.points[2].x, 
+                 triangle.points[2].y, 
+                 0xFF00FF00);
   }
 
   /*for (int i = 0; i < N_POINTS; i++)
@@ -175,6 +193,8 @@ void render(void)
   
   DrawRectangle(300, 150, 300, 200, 0xFFFF00FF);*/
   
+  ArrayFree(trianglesToRender);
+  
   renderColorBuffer();
 
   clearColorBuffer(0xFF000000);
@@ -183,6 +203,12 @@ void render(void)
 }
 
 
+void FreeResources(void)
+{
+  free(colorBuffer);
+  ArrayFree(mesh.faces);
+  ArrayFree(mesh.vertices);
+}
 
 int main(int argc, char* args[])
 {
@@ -199,6 +225,7 @@ int main(int argc, char* args[])
     render();
   }
   
-  destroyWindow();
+  DestroyWindow();
+  FreeResources();
   return 0;
 }

@@ -1,15 +1,24 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(513,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (3drendeder-windows-empty.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Display.c
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Display.c(74,30): warning C4244: 'function': conversion from 'double' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Display.c(74,47): warning C4244: 'function': conversion from 'double' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Display.c(69,1): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Display.c(70,1): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
   Main.c
-S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(97,25): warning C4305: '+=': truncation from 'double' to 'float'
-S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(98,25): warning C4305: '+=': truncation from 'double' to 'float'
-S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(99,25): warning C4305: '+=': truncation from 'double' to 'float'
-S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(158,39): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(158,61): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(159,39): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(159,61): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(160,39): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(160,61): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-  Mesh.c
-  Triangle.c
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(103,26): warning C4305: '+=': truncation from 'double' to 'float'
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(104,26): warning C4305: '+=': truncation from 'double' to 'float'
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(105,26): warning C4305: '+=': truncation from 'double' to 'float'
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(168,39): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(168,61): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(169,39): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(169,61): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(170,39): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(170,61): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(172,38): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(173,38): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(174,38): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(175,38): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(176,38): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(177,38): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
   Generating Code...
   3drendeder-windows-empty.vcxproj -> S:\Github\3drenderer\Windows\Debug\3drendeder-windows.exe
