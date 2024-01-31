@@ -1,5 +1,15 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(513,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (3drendeder-windows-empty.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   Main.c
-S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(101,55): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(102,56): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(97,25): warning C4305: '+=': truncation from 'double' to 'float'
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(98,25): warning C4305: '+=': truncation from 'double' to 'float'
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(99,25): warning C4305: '+=': truncation from 'double' to 'float'
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(158,39): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(158,61): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(159,39): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(159,61): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(160,39): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+S:\Github\3drenderer\Windows\3drendeder-windows-empty\Main.c(160,61): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+  Mesh.c
+  Triangle.c
+  Generating Code...
   3drendeder-windows-empty.vcxproj -> S:\Github\3drenderer\Windows\Debug\3drendeder-windows.exe

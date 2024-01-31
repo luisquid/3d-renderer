@@ -3,18 +3,23 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include "Display.h"
-#include "vector.h"
+#include "Vector.h"
+#include "Mesh.h"
 
-#define N_POINTS (9 * 9 * 9)
+//#define N_POINTS (9 * 9 * 9)
 
 vec3_t cameraPosition = {0, 0, -5};
+vec3_t cubeRotation = {0, 0, 0};
 
-vec3_t cubePoints[N_POINTS];
-vec2_t projectedPoints[N_POINTS];
+triangle_t trianglesToRender [N_MESH_FACES];
+
+//vec3_t cubePoints[N_POINTS];
+//vec2_t projectedPoints[N_POINTS];
 
 float fovFactor = 640;
 
 bool isRunning;
+int previousFrameTime = 0;
 
 bool setup(void)
 {
@@ -30,7 +35,7 @@ bool setup(void)
     return false;
   }
 
-  int pointCount = 0;
+  /*int pointCount = 0;
 
   for (float x = -1; x <= 1; x += 0.25)
   {
@@ -42,7 +47,7 @@ bool setup(void)
         cubePoints[pointCount++] = newPoint;
       }
     }
-  }
+  }*/
   
   return true;
 }
@@ -78,14 +83,66 @@ vec2_t Project(vec3_t point)
 
 void update(void)
 {
-  for (int i = 0; i < N_POINTS; i++)
+  int timeToWait = FRAME_TARGET_TIME - (SDL_GetTicks() - previousFrameTime);
+
+  if (timeToWait > 0 && timeToWait <= FRAME_TARGET_TIME)
+  {
+    SDL_Delay(timeToWait);
+  }
+
+  //while(!SDL_TICKS_PASSED(SDL_GetTicks(), previousFrameTime + FRAME_TARGET_TIME));
+
+  previousFrameTime = SDL_GetTicks();
+
+  cubeRotation.x += 0.01;
+  cubeRotation.y += 0.01;
+  cubeRotation.z += 0.01;
+
+  for (int i = 0; i < N_MESH_FACES; i++)
+  {
+    face_t meshFace = meshFaces[i];
+    
+    vec3_t faceVertices[3];
+    faceVertices[0] = meshVertices[meshFace.a - 1];
+    faceVertices[1] = meshVertices[meshFace.b - 1];
+    faceVertices[2] = meshVertices[meshFace.c - 1];
+    
+    triangle_t projectedTriangle;
+
+    for (int j = 0; j < 3; j++)
+    {
+        vec3_t transfomedVertex = faceVertices[j];
+        transfomedVertex = Vec3RotateX(transfomedVertex, cubeRotation.x);
+        transfomedVertex = Vec3RotateY(transfomedVertex, cubeRotation.y);
+        transfomedVertex = Vec3RotateZ(transfomedVertex, cubeRotation.z);
+        
+        transfomedVertex.z -= cameraPosition.z;
+
+        vec2_t projectedPoint = Project(transfomedVertex);
+
+        projectedPoint.x += (windowWidth / 2);
+        projectedPoint.y += (windowHeight / 2);
+
+        projectedTriangle.points [j] = projectedPoint;
+    }
+    
+    //Save the projected triangles to render
+    trianglesToRender[i] = projectedTriangle;
+  }
+
+  /*for (int i = 0; i < N_POINTS; i++)
   {
     vec3_t point = cubePoints[i];
-    point.z -= cameraPosition.z;
 
-    vec2_t projectedPoint = Project(point);
+    vec3_t transformedPoint = Vec3RotateX(point, cubeRotation.x);
+    transformedPoint = Vec3RotateY(transformedPoint, cubeRotation.y);
+    transformedPoint = Vec3RotateZ(transformedPoint, cubeRotation.z);
+  
+    transformedPoint.z -= cameraPosition.z;
+
+    vec2_t projectedPoint = Project(transformedPoint);
     projectedPoints[i] = projectedPoint;
-  }
+  }*/
 }
 
 void render(void)
@@ -94,8 +151,16 @@ void render(void)
   SDL_RenderClear(renderer);
   */
   DrawGrid();
+  
+  for (int i = 0; i < N_MESH_FACES; i++)
+  {
+    triangle_t triangle = trianglesToRender[i];
+    DrawRectangle(triangle.points[0].x, triangle.points[0].y, 3, 3, 0xFFFFFF00);
+    DrawRectangle(triangle.points[1].x, triangle.points[1].y, 3, 3, 0xFFFFFF00);
+    DrawRectangle(triangle.points[2].x, triangle.points[2].y, 3, 3, 0xFFFFFF00);
+  }
 
-  for (int i = 0; i < N_POINTS; i++)
+  /*for (int i = 0; i < N_POINTS; i++)
   {
     vec2_t projectedPoint = projectedPoints[i];
     DrawRectangle(projectedPoint.x + (windowWidth / 2),
@@ -104,7 +169,7 @@ void render(void)
                   4, 
                   0xFFFFFF00
                   );
-  }
+  }*/
 
   /*DrawPixel(20, 20, 0xFFFF0000);
   
