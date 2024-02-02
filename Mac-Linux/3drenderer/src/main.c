@@ -42,6 +42,17 @@ void setup(void) {
 
     // Loads the OBJ values to the mesh data structure
     load_obj_file_data("./assets/PurpleMotorcycle.obj");
+
+    vec3_t a = {1,2,3};
+    vec3_t b = {1,2,3};
+
+    float a_length = vec3_length(a);
+    float b_length = vec3_length(b);
+
+    vec3_t sum = vec3_add(a,b);
+    vec3_t sub = vec3_substract(a,b);
+
+    printf("SUM: %d, %d", sum.x, sum.y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
