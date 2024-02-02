@@ -38,7 +38,10 @@ void setup(void) {
     );
 
     // Loads the cube values in the mesh data structure
-    load_cube_mesh_data();
+    //load_cube_mesh_data();
+
+    // Loads the OBJ values to the mesh data structure
+    load_obj_file_data("./assets/PurpleMotorcycle.obj");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
