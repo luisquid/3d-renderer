@@ -1,15 +1,16 @@
 #ifndef TRIANGLE_H
 #define TRIANGLE_H
+
 #include "Vector.h"
 
 typedef struct {
   int a;
-  int b; 
+  int b;
   int c;
-} face_t; 
+} face_t;
 
-typedef struct{
+typedef struct {
   vec2_t points[3];
-}triangle_t;
+} triangle_t;
 
-#endif // !TRIANGLE_H
+#endif
