@@ -1,14 +1,14 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#define ArrayPush(array, value)                                              \
+#define array_push(array, value)                                              \
     do {                                                                      \
-        (array) = ArrayHold((array), 1, sizeof(*(array)));                   \
-        (array)[ArrayLength(array) - 1] = (value);                           \
+        (array) = array_hold((array), 1, sizeof(*(array)));                   \
+        (array)[array_length(array) - 1] = (value);                           \
     } while (0);
 
-void* ArrayHold(void* array, int count, int itemSize);
-int ArrayLength(void* array);
-void ArrayFree(void* array);
+void* array_hold(void* array, int count, int item_size);
+int array_length(void* array);
+void array_free(void* array);
 
 #endif
