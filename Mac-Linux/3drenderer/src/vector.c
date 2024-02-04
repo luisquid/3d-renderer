@@ -50,6 +50,12 @@ float vec2_dot(vec2_t v1, vec2_t v2)
     return result;
 }
 
+void vec2_normalize(vec2_t * v)
+{
+    float magnitude = sqrt(v->x * v->x + v->y * v->y);
+    v->x /= magnitude;
+    v->y /= magnitude;
+}
 
 /// Vector 3D Function Implementations
 float vec3_length(vec3_t v)
@@ -114,6 +120,14 @@ float vec3_dot(vec3_t v1, vec3_t v2)
     float result;
     result = (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z);
     return result;
+}
+
+void vec3_normalize(vec3_t * v)
+{
+    float magnitude = sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
+    v->x /= magnitude;
+    v->y /= magnitude;
+    v->z /= magnitude;
 }
 
 vec3_t vec3_rotate_x(vec3_t v, float angle) {

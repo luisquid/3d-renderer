@@ -18,7 +18,7 @@ triangle_t* triangles_to_render = NULL;
 bool is_running = false;
 int previous_frame_time = 0;
 
-vec3_t camera_position = { .x = 0, .y = 0, .z = -5 };
+vec3_t camera_position = { .x = 0, .y = 0, .z = 0 };
 float fov_factor = 640;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,18 +41,7 @@ void setup(void) {
     //load_cube_mesh_data();
 
     // Loads the OBJ values to the mesh data structure
-    load_obj_file_data("./assets/PurpleMotorcycle.obj");
-
-    vec3_t a = {1,2,3};
-    vec3_t b = {1,2,3};
-
-    float a_length = vec3_length(a);
-    float b_length = vec3_length(b);
-
-    vec3_t sum = vec3_add(a,b);
-    vec3_t sub = vec3_substract(a,b);
-
-    printf("SUM: %d, %d", sum.x, sum.y);
+    load_obj_file_data("./assets/cube.obj");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -115,6 +104,7 @@ void update(void) {
         face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
         triangle_t projected_triangle;
+        vec3_t transformed_vertices[3];
 
         // Loop all three vertices of this current face and apply transformations
         for (int j = 0; j < 3; j++) {
@@ -125,10 +115,39 @@ void update(void) {
             transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
 
             // Translate the vertex away from the camera
-            transformed_vertex.z -= camera_position.z;
+            transformed_vertex.z -= 5;
 
+            transformed_vertices[j] = transformed_vertex;
+        }
+
+        // Backface Culling
+        vec3_t vector_a = transformed_vertices[0];
+        vec3_t vector_b = transformed_vertices[1];
+        vec3_t vector_c = transformed_vertices[2];
+
+        vec3_t vector_ab = vec3_substract(vector_b, vector_a);
+        vec3_normalize(&vector_ab);
+        vec3_t vector_ac = vec3_substract(vector_c, vector_a);
+        vec3_normalize(&vector_ac);
+
+        // Cross product order depends on the coordinate system direction (left handed or right handed)
+        vec3_t normal = vec3_cross(vector_ab, vector_ac);
+        vec3_normalize(&normal);
+
+        vec3_t camera_ray = vec3_substract(camera_position, vector_a);
+
+        float dot_normal_camera = vec3_dot(normal, camera_ray);
+
+        // Bypass triangle rendering if its not looking at the camera
+        if(dot_normal_camera < 0)
+        {
+            continue;
+        }
+
+        for (int j = 0; j < 3; j++)
+        {
             // Project the current vertex
-            vec2_t projected_point = project(transformed_vertex);
+            vec2_t projected_point = project(transformed_vertices[j]);
 
             // Scale and translate the projected points to the middle of the screen
             projected_point.x += (window_width / 2);
