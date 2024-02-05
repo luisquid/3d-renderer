@@ -186,6 +186,7 @@ void render(void) {
         );
     }
 
+    draw_filled_triangle(300,100, 15, 400, 500, 700, 0xFF00FF00);
     // Clear the array of triangles to render every frame loop
     array_free(triangles_to_render);
 
