@@ -190,18 +190,23 @@ void update(void) {
             //projected_triangle.points[j] = projected_point;
         }
 
+        float avg_depth = (transformed_vertices[0].z +transformed_vertices[1].z +  transformed_vertices[2].z)/3;
+
         triangle_t projected_triangle = {
             .points = {
                 {projected_points[0].x, projected_points[0].y},
                 {projected_points[1].x, projected_points[1].y},
                 {projected_points[2].x, projected_points[2].y}
             },
-            .color = mesh_face.color
+            .color = mesh_face.color,
+            .avg_depth = avg_depth
         };
 
         // Save the projected triangle in the array of triangles to render
         array_push(triangles_to_render, projected_triangle);
     }
+
+    //TO DO: Sort the triangles to render by their average depth
 }
 
 ///////////////////////////////////////////////////////////////////////////////
