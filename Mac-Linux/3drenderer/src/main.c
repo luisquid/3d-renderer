@@ -16,10 +16,6 @@ triangle_t* triangles_to_render = NULL;
 // Global variables for execution status and game loop
 ///////////////////////////////////////////////////////////////////////////////
 bool is_running = false;
-bool backface_culling = true;
-bool fill_triangles = false;
-bool wireframe = true;
-bool dots = false;
 
 enum cull_method{
     CULL_NONE,
@@ -76,18 +72,18 @@ void process_input(void) {
         case SDL_KEYDOWN:
             if (event.key.keysym.sym == SDLK_ESCAPE)
                 is_running = false;
-            else if(event.key.keysym.sym == SDLK_1)
+            if(event.key.keysym.sym == SDLK_1)
                 render_mode = RENDER_WIRE_VERTEX;
-            else if(event.key.keysym.sym == SDLK_2)
+            if(event.key.keysym.sym == SDLK_2)
                 render_mode = RENDER_WIRE;
-            else if(event.key.keysym.sym == SDLK_3)
+            if(event.key.keysym.sym == SDLK_3)
                 render_mode = RENDER_FILL_TRIANGLE;
-            else if(event.key.keysym.sym == SDLK_4)
+            if(event.key.keysym.sym == SDLK_4)
                 render_mode = RENDER_FILL_TRIANGLE_WIRE;
-            else if(event.key.keysym.sym == SDLK_c)
-                backface_culling = CULL_BACKFACE;
-            else if(event.key.keysym.sym == SDLK_d)
-                backface_culling = CULL_NONE;
+            if(event.key.keysym.sym == SDLK_c)
+                cull_method = CULL_BACKFACE;
+            if(event.key.keysym.sym == SDLK_d)
+                cull_method = CULL_NONE;
             break;
     }
 }
@@ -145,12 +141,12 @@ void update(void) {
             transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
 
             // Translate the vertex away from the camera
-            transformed_vertex.z -= 5;
+            transformed_vertex.z += 5;
 
             transformed_vertices[j] = transformed_vertex;
         }
 
-        if(backface_culling == CULL_BACKFACE)
+        if(cull_method == CULL_BACKFACE)
         {
             // Backface Culling
             vec3_t vector_a = transformed_vertices[0];
@@ -190,23 +186,35 @@ void update(void) {
             //projected_triangle.points[j] = projected_point;
         }
 
-        float avg_depth = (transformed_vertices[0].z +transformed_vertices[1].z +  transformed_vertices[2].z)/3;
+        float avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z +  transformed_vertices[2].z) / 3.0;
 
         triangle_t projected_triangle = {
             .points = {
-                {projected_points[0].x, projected_points[0].y},
-                {projected_points[1].x, projected_points[1].y},
-                {projected_points[2].x, projected_points[2].y}
+                { projected_points[0].x, projected_points[0].y },
+                { projected_points[1].x, projected_points[1].y },
+                { projected_points[2].x, projected_points[2].y }
             },
             .color = mesh_face.color,
             .avg_depth = avg_depth
         };
+
 
         // Save the projected triangle in the array of triangles to render
         array_push(triangles_to_render, projected_triangle);
     }
 
     //TO DO: Sort the triangles to render by their average depth
+    int num_triangles = array_length(triangles_to_render);
+    for (int i = 0; i < num_triangles; i++){
+        for (int j = i; j < num_triangles; j++){
+            if(triangles_to_render[i].avg_depth < triangles_to_render[j].avg_depth){
+                triangle_t temp = triangles_to_render[i];
+                triangles_to_render[i] = triangles_to_render[j];
+                triangles_to_render[j] = temp;
+            }
+        }
+    }
+    
 }
 
 ///////////////////////////////////////////////////////////////////////////////
