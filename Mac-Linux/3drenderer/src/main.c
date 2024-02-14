@@ -7,6 +7,7 @@
 #include "vector.h"
 #include "mesh.h"
 #include "matrix.h"
+#include "light.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Array of triangles that should be rendered frame by frame
@@ -33,7 +34,8 @@ enum render_mode{
 int previous_frame_time = 0;
 
 vec3_t camera_position = { .x = 0, .y = 0, .z = 0 };
-float fov_factor = 640;
+
+mat4_t proj_matrix;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Setup function to initialize variables and game objects
@@ -53,11 +55,18 @@ void setup(void) {
         window_height
     );
 
+    // Initialize the perspective projection matrix
+    float fov = M_PI / 3.0;
+    float aspect = (float)window_height / (float)window_width;
+    float znear = 0.1;
+    float zfar = 100.0;
+    proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
+
     // Loads the cube values in the mesh data structure
-    load_cube_mesh_data();
+    //load_cube_mesh_data();
 
     // Loads the OBJ values to the mesh data structure
-    //load_obj_file_data("./assets/cube.obj");
+    load_obj_file_data("./assets/f22.obj");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,13 +101,13 @@ void process_input(void) {
 ////////////////////////////////////////////////////////////////////////////////
 // Function that receives a 3D vector and returns a projected 2D point
 ////////////////////////////////////////////////////////////////////////////////
-vec2_t project(vec3_t point) {
-    vec2_t projected_point = {
-        .x = (fov_factor * point.x) / point.z,
-        .y = (fov_factor * point.y) / point.z
-    };
-    return projected_point;
-}
+// vec2_t project(vec3_t point) {
+//     vec2_t projected_point = {
+//         .x = (fov_factor * point.x) / point.z,
+//         .y = (fov_factor * point.y) / point.z
+//     };
+//     return projected_point;
+// }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Update function frame by frame with a fixed time step
@@ -117,13 +126,7 @@ void update(void) {
     // Initialize the array of triangles to render
     triangles_to_render = NULL;
 
-    mesh.rotation.x += 0.01;
-    mesh.rotation.y += 0.01;
-    mesh.rotation.z += 0.01;
-    mesh.scale.x += 0.002;
-    mesh.scale.y += 0.001;
-    mesh.translation.x += 0.006;
-
+    mesh.rotation.x += 0.01;    
     mesh.translation.z = 5.0;
 
     mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
@@ -174,8 +177,6 @@ void update(void) {
             transformed_vertices[j] = transformed_vertex;
         }
 
-        if(cull_method == CULL_BACKFACE)
-        {
             // Backface Culling
             vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]);
             vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]);
@@ -193,7 +194,8 @@ void update(void) {
             vec3_t camera_ray = vec3_substract(camera_position, vector_a);
 
             float dot_normal_camera = vec3_dot(normal, camera_ray);
-
+        if(cull_method == CULL_BACKFACE)
+        {
             // Bypass triangle rendering if its not looking at the camera
             if(dot_normal_camera < 0)
             {
@@ -201,20 +203,33 @@ void update(void) {
             }
         }
         
-        vec2_t projected_points [3];
+        vec4_t projected_points [3];
         for (int j = 0; j < 3; j++)
         {
             // Project the current vertex
-            projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
+            // projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
+            projected_points[j] = mat4_mul_vec4_project(proj_matrix, transformed_vertices[j]);
 
-            // Scale and translate the projected points to the middle of the screen
-            projected_points[j].x += (window_width / 2);
-            projected_points[j].y += (window_height / 2);
+            projected_points[j].x *= (window_width / 2.0);
+            projected_points[j].y *= (window_height / 2.0);
+
+
+            projected_points[j].y *= -1;    
+
+            // Translate the projected points to the middle of the screen
+            projected_points[j].x += (window_width / 2.0);
+            projected_points[j].y += (window_height / 2.0);
 
             //projected_triangle.points[j] = projected_point;
         }
 
         float avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z +  transformed_vertices[2].z) / 3.0;
+
+
+        float light_intensity_factor = -vec3_dot(normal, main_light.direction);
+
+        uint32_t triangle_color = light_apply_intensity(mesh_face.color, light_intensity_factor);
+
 
         triangle_t projected_triangle = {
             .points = {
@@ -222,7 +237,7 @@ void update(void) {
                 { projected_points[1].x, projected_points[1].y },
                 { projected_points[2].x, projected_points[2].y }
             },
-            .color = mesh_face.color,
+            .color = triangle_color,
             .avg_depth = avg_depth
         };
 
