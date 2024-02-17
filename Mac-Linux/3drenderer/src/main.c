@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+#include "upng.h"
 #include "array.h"
 #include "display.h"
 #include "vector.h"
@@ -39,7 +40,7 @@ void setup(void) {
     // Creating a SDL texture that is used to display the color buffer
     color_buffer_texture = SDL_CreateTexture(
         renderer,
-        SDL_PIXELFORMAT_ARGB8888,
+        SDL_PIXELFORMAT_RGBA32,
         SDL_TEXTUREACCESS_STREAMING,
         window_width,
         window_height
@@ -52,15 +53,19 @@ void setup(void) {
     float zfar = 100.0;
     proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
-    mesh_texture = (uint32_t*) REDBRICK_TEXTURE;
-    texture_width = 64;
-    texture_height = 64;
+    // MANUALLY LOAD THE HARDCODED TEXTURE
+    // mesh_texture = (uint32_t*) REDBRICK_TEXTURE;
+    // texture_width = 64;
+    // texture_height = 64;
 
     // Loads the cube values in the mesh data structure
-    load_cube_mesh_data();
+    //load_cube_mesh_data();
 
     // Loads the OBJ values to the mesh data structure
-    //load_obj_file_data("./assets/f22.obj");
+    load_obj_file_data("./assets/crab.obj");
+
+    load_png_texture_data("./assets/crab.png");
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,9 +118,9 @@ void update(void) {
     // Initialize the array of triangles to render
     triangles_to_render = NULL;
 
-    mesh.rotation.x += 0.01;    
-    mesh.rotation.y += 0.003;    
-    mesh.rotation.z += 0.008;    
+    mesh.rotation.y += 0.01;    
+    // mesh.rotation.y += 0.003;    
+    // mesh.rotation.z += 0.008;    
     mesh.translation.z = 5.0;
 
     mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
@@ -138,9 +143,9 @@ void update(void) {
         face_t mesh_face = mesh.faces[i];
 
         vec3_t face_vertices[3];
-        face_vertices[0] = mesh.vertices[mesh_face.a - 1];
-        face_vertices[1] = mesh.vertices[mesh_face.b - 1];
-        face_vertices[2] = mesh.vertices[mesh_face.c - 1];
+        face_vertices[0] = mesh.vertices[mesh_face.a];
+        face_vertices[1] = mesh.vertices[mesh_face.b];
+        face_vertices[2] = mesh.vertices[mesh_face.c];
 
         vec4_t transformed_vertices[3];
 
@@ -255,9 +260,9 @@ void render(void) {
         if(render_mode == RENDER_WIRE_VERTEX)
         {
             // Draw vertex points
-            draw_rect(triangle.points[0].x - 3, triangle.points[0].y - 3, 6, 6, 0xFFFF0000); // vertex A
-            draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6, 0xFFFF0000); // vertex B
-            draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, 0xFFFF0000); // vertex C
+            draw_rect(triangle.points[0].x - 3, triangle.points[0].y - 3, 6, 6, 0xFF0000FF); // vertex A
+            draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6, 0xFF0000FF); // vertex B
+            draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, 0xFF0000FF); // vertex C
         }
         
 
@@ -315,6 +320,7 @@ void free_resources(void) {
     free(color_buffer);
     array_free(mesh.faces);
     array_free(mesh.vertices);
+    upng_free(png_texture);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

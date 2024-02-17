@@ -23,48 +23,6 @@ vec3_t cube_vertices[N_CUBE_VERTICES] = {
     { .x = -1, .y = -1, .z =  1 }  // 8
 };
 
-// face_t cube_faces[N_CUBE_FACES] = {
-//     // front
-//     { .a = 1, .b = 2, .c = 3 , .color = 0xFFFF0000},
-//     { .a = 1, .b = 3, .c = 4, .color = 0xFFFF0000 },
-//     // right
-//     { .a = 4, .b = 3, .c = 5, .color = 0xFF00FF00 },
-//     { .a = 4, .b = 5, .c = 6, .color = 0xFF00FF00 },
-//     // back
-//     { .a = 6, .b = 5, .c = 7, .color = 0xFF0000FF },
-//     { .a = 6, .b = 7, .c = 8, .color = 0xFF0000FF },
-//     // left
-//     { .a = 8, .b = 7, .c = 2, .color = 0xFFFFFF00 },
-//     { .a = 8, .b = 2, .c = 1, .color = 0xFFFFFF00 },
-//     // top
-//     { .a = 2, .b = 7, .c = 5, .color = 0xFFFF00FF },
-//     { .a = 2, .b = 5, .c = 3, .color = 0xFFFF00FF },
-//     // bottom
-//     { .a = 6, .b = 8, .c = 1, .color = 0xFF00FFFF },
-//     { .a = 6, .b = 1, .c = 4, .color = 0xFF00FFFF }
-// };
-
-// face_t cube_faces[N_CUBE_FACES] = {
-//     // front
-//     { .a = 1, .b = 2, .c = 3 , .color = 0xFFFFFFFF},
-//     { .a = 1, .b = 3, .c = 4, .color = 0xFFFFFFFF },
-//     // right
-//     { .a = 4, .b = 3, .c = 5, .color = 0xFFFFFFFF },
-//     { .a = 4, .b = 5, .c = 6, .color = 0xFFFFFFFF },
-//     // back
-//     { .a = 6, .b = 5, .c = 7, .color = 0xFFFFFFFF },
-//     { .a = 6, .b = 7, .c = 8, .color = 0xFFFFFFFF },
-//     // left
-//     { .a = 8, .b = 7, .c = 2, .color = 0xFFFFFFFF },
-//     { .a = 8, .b = 2, .c = 1, .color = 0xFFFFFFFF },
-//     // top
-//     { .a = 2, .b = 7, .c = 5, .color = 0xFFFFFFFF },
-//     { .a = 2, .b = 5, .c = 3, .color = 0xFFFFFFFF },
-//     // bottom
-//     { .a = 6, .b = 8, .c = 1, .color = 0xFFFFFFFF },
-//     { .a = 6, .b = 1, .c = 4, .color = 0xFFFFFFFF }
-// };
-
 face_t cube_faces[N_CUBE_FACES] = {
     // front
     { .a = 1, .b = 2, .c = 3, .a_uv = { 0, 1 }, .b_uv = { 0, 0 }, .c_uv = { 1, 0 }, .color = 0xFFFFFFFF },
@@ -103,6 +61,8 @@ void load_obj_file_data(char* filename)
     file = fopen(filename, "r");
 
     char lines[4096]; 
+    
+    tex2_t* texcoords = NULL;
 
     while(fgets(lines, 4096, file))
     {
@@ -119,6 +79,12 @@ void load_obj_file_data(char* filename)
             array_push(mesh.vertices, vertex);       
         }
 
+        if(strncmp(lines, "vt ", 3) == 0){
+            tex2_t texcoord;
+            sscanf(lines, "vt %f %f", &texcoord.u, &texcoord.v);
+            array_push(texcoords, texcoord);
+        }
+
         int vertexIndices[3];
         int textureIndices[3];
         int normalIndices[3];
@@ -133,13 +99,16 @@ void load_obj_file_data(char* filename)
                 &vertexIndices[2], &textureIndices[2], &normalIndices[2]
             );
 
-            
-            face.a = vertexIndices[0];
-            face.b = vertexIndices[1]; 
-            face.c = vertexIndices[2];
+            face.a = vertexIndices[0] - 1;
+            face.b = vertexIndices[1] - 1; 
+            face.c = vertexIndices[2] - 1;
+            face.a_uv = texcoords[textureIndices[0] - 1];
+            face.b_uv = texcoords[textureIndices[1] - 1];
+            face.c_uv = texcoords[textureIndices[2] - 1];
             face.color = 0xFFFFFFFF;
             array_push(mesh.faces, face);
         }  
     }
+    array_free(texcoords);
 }
 
