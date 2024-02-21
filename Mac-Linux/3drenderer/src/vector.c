@@ -2,6 +2,11 @@
 #include "vector.h"
 
 /// Vector 2D Function Implementations
+vec2_t vec2_new(float x, float y){
+    vec2_t new_vector = {x, y};
+    return new_vector;
+}
+
 float vec2_length(vec2_t v)
 {
     return sqrt(v.x * v.x + v.y * v.y);
@@ -58,6 +63,11 @@ void vec2_normalize(vec2_t * v)
 }
 
 /// Vector 3D Function Implementations
+vec3_t vec3_new(float x, float y, float z){
+    vec3_t new_vector = {x, y, z};
+    return new_vector;
+}
+
 float vec3_length(vec3_t v)
 {
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);

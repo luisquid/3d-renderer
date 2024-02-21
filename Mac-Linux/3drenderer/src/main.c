@@ -5,6 +5,7 @@
 #include "upng.h"
 #include "array.h"
 #include "display.h"
+#include "clipping.h"
 #include "vector.h"
 #include "mesh.h"
 #include "matrix.h"
@@ -12,6 +13,7 @@
 #include "texture.h"
 #include "triangle.h"
 #include "camera.h"
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Array of triangles that should be rendered frame by frame
@@ -58,6 +60,8 @@ void setup(void) {
     float znear = 0.1;
     float zfar = 100.0;
     proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
+
+    initialize_frustum_planes(fov, znear, zfar);
 
     // Loads the cube values in the mesh data structure
     //load_cube_mesh_data();
@@ -158,14 +162,6 @@ void update(void) {
     mat4_t rotation_matrix_y = mat4_make_rotation_y(mesh.rotation.y);
     mat4_t rotation_matrix_z = mat4_make_rotation_z(mesh.rotation.z);
 
-    // ORDER MATTERS!! Scale -> Rotate -> Translate
-    world_matrix = mat4_identity();
-    world_matrix = mat4_mul_mat4(scale_matrix, world_matrix);
-    world_matrix = mat4_mul_mat4(rotation_matrix_x, world_matrix);
-    world_matrix = mat4_mul_mat4(rotation_matrix_y, world_matrix);
-    world_matrix = mat4_mul_mat4(rotation_matrix_z, world_matrix);
-    world_matrix = mat4_mul_mat4(translation_matrix, world_matrix);
-
     // Loop all triangle faces of our mesh
     int num_faces = array_length(mesh.faces);
     for (int i = 0; i < num_faces; i++) {
@@ -182,6 +178,14 @@ void update(void) {
         for (int j = 0; j < 3; j++) {
             vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
+            // ORDER MATTERS!! Scale -> Rotate -> Translate
+            world_matrix = mat4_identity();
+            world_matrix = mat4_mul_mat4(scale_matrix, world_matrix);
+            world_matrix = mat4_mul_mat4(rotation_matrix_x, world_matrix);
+            world_matrix = mat4_mul_mat4(rotation_matrix_y, world_matrix);
+            world_matrix = mat4_mul_mat4(rotation_matrix_z, world_matrix);
+            world_matrix = mat4_mul_mat4(translation_matrix, world_matrix);
+
             transformed_vertex = mat4_mul_vec4(world_matrix, transformed_vertex);
 
             transformed_vertex = mat4_mul_vec4(view_matrix, transformed_vertex);
@@ -191,23 +195,24 @@ void update(void) {
         }
 
             // Backface Culling
-            vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]);
-            vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]);
-            vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]);
+        vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]);
+        vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]);
+        vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]);
 
-            vec3_t vector_ab = vec3_substract(vector_b, vector_a);
-            vec3_normalize(&vector_ab);
-            vec3_t vector_ac = vec3_substract(vector_c, vector_a);
-            vec3_normalize(&vector_ac);
+        vec3_t vector_ab = vec3_substract(vector_b, vector_a);
+        vec3_normalize(&vector_ab);
+        vec3_t vector_ac = vec3_substract(vector_c, vector_a);
+        vec3_normalize(&vector_ac);
 
-            // Cross product order depends on the coordinate system direction (left handed or right handed)
-            vec3_t normal = vec3_cross(vector_ab, vector_ac);
-            vec3_normalize(&normal);
+        // Cross product order depends on the coordinate system direction (left handed or right handed)
+        vec3_t normal = vec3_cross(vector_ab, vector_ac);
+        vec3_normalize(&normal);
 
-            vec3_t origin = {0, 0, 0};
-            vec3_t camera_ray = vec3_substract(origin, vector_a);
+        vec3_t origin = {0, 0, 0};
+        vec3_t camera_ray = vec3_substract(origin, vector_a);
 
-            float dot_normal_camera = vec3_dot(normal, camera_ray);
+        float dot_normal_camera = vec3_dot(normal, camera_ray);
+
         if(cull_method == CULL_BACKFACE)
         {
             // Bypass triangle rendering if its not looking at the camera
@@ -216,6 +221,14 @@ void update(void) {
                 continue; 
             }
         }
+
+        polygon_t polygon = create_polygon_from_triangle(
+            vec3_from_vec4(transformed_vertices[0]), 
+            vec3_from_vec4(transformed_vertices[1]), 
+            vec3_from_vec4(transformed_vertices[2])
+        );
+
+        clip_polygon(&polygon);
         
         vec4_t projected_points [3];
         for (int j = 0; j < 3; j++)

@@ -20,6 +20,7 @@ typedef struct {
 } vec4_t;
 
 // Vector 2D Functions
+vec2_t vec2_new(float x, float y);
 float vec2_length(vec2_t v);
 vec2_t vec2_substract(vec2_t v1, vec2_t v2);
 vec2_t vec2_mul(vec2_t v, float factor);
@@ -29,6 +30,7 @@ void vec2_normalize(vec2_t * v);
 
 
 // Vector 3D Functions
+vec3_t vec3_new(float x, float y, float z);
 float vec3_length(vec3_t v);
 vec3_t vec3_add(vec3_t v1, vec3_t v2);
 vec3_t vec3_substract(vec3_t v1, vec3_t v2);
