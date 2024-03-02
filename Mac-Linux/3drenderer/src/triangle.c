@@ -76,7 +76,7 @@ void draw_triangle_pixel(int x, int y, uint32_t color,
     } 
 }
 
-void draw_texel(int x, int y, uint32_t* texture, 
+void draw_texel(int x, int y, upng_t* texture, 
                 vec4_t point_a, vec4_t point_b, vec4_t point_c, 
                 tex2_t a_uv, tex2_t b_uv, tex2_t c_uv
                 //float u0, float v0, float u1, float v1, float u2, float v2
@@ -103,13 +103,16 @@ void draw_texel(int x, int y, uint32_t* texture,
     interpolated_u /= interpolated_reciprocal_w;
     interpolated_v /= interpolated_reciprocal_w;
 
+    int texture_width = upng_get_width(texture);
+    int texture_height = upng_get_height(texture);
 
     int tex_x = abs((int)(interpolated_u * texture_width)) % texture_width;
     int tex_y = abs((int)(interpolated_v * texture_height)) % texture_height;
 
     interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
     if(interpolated_reciprocal_w < get_z_buffer_at(x, y)){
-        draw_pixel(x, y, texture[(texture_width * tex_y) + tex_x]);
+        uint32_t* texture_buffer = (uint32_t*) upng_get_buffer(texture);
+        draw_pixel(x, y, texture_buffer[(texture_width * tex_y) + tex_x]);
 
         // Update z buffer with value 1 / w of current pixel
         update_z_buffer_at(x, y, interpolated_reciprocal_w);
@@ -121,45 +124,6 @@ void draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t colo
     draw_line(x1, y1, x2, y2, color);
     draw_line(x2, y2, x0, y0, color);
 }
-
-// void draw_filled_triangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
-// {
-//     if(y0 > y1)
-//     {
-//         int_swap(&y0, &y1);
-//         int_swap(&x0, &x1);
-//     }
-
-//     if(y1 > y2)
-//     {
-//         int_swap(&y1, &y2);
-//         int_swap(&x1, &x2);
-//     }
-
-//     if(y0 > y1)
-//     {
-//         int_swap(&y0, &y1);
-//         int_swap(&x0, &x1);
-//     }
-
-//     if(y1 == y2)
-//     {
-//         fill_flat_bottom_triangle(x0, y0, x1, y1, x2, y2, color);
-//     }
-//     else if(y0 == y1)
-//     {
-//         fill_flat_top_triangle(x0, y0, x1, y1, x2, y2, color);
-//     }
-//     else
-//     {
-//         // Calculate new vertex Mx and My
-//         int My = y1;
-//         int Mx = (((float)(x2 - x0) * (y1 - y0)) / (float)(y2 - y0)) + x0;    
-
-//         fill_flat_bottom_triangle(x0, y0, x1, y1, Mx, My, color);
-//         fill_flat_top_triangle(x1, y1, Mx, My, x2, y2, color);
-//     }
-// }
 
 void draw_filled_triangle(int x0, int y0, float z0, float w0, 
                           int x1, int y1, float z1, float w1, 
@@ -189,18 +153,9 @@ void draw_filled_triangle(int x0, int y0, float z0, float w0,
         int_swap(&x0, &x1);
     }
 
-    // Flip the V Component to account for inverted UV Coordinates
-    // v0 = 1.0 - v0;
-    // v1 = 1.0 - v1;
-    // v2 = 1.0 - v2;
-
     vec4_t point_a = {x0, y0, z0, w0}; 
     vec4_t point_b = {x1, y1, z1, w1}; 
     vec4_t point_c = {x2, y2, z2, w2};
-
-    // tex2_t a_uv = {u0, v0};
-    // tex2_t b_uv = {u1, v1};
-    // tex2_t c_uv = {u2, v2};
 
     // Render upper part of the triangle (Flat Bottom)
     float inv_slope_1 = 0;
@@ -252,7 +207,7 @@ void draw_filled_triangle(int x0, int y0, float z0, float w0,
 void draw_textured_triangle(int x0, int y0, float z0, float w0, float u0, float v0, 
                             int x1, int y1, float z1, float w1, float u1, float v1, 
                             int x2, int y2, float z2, float w2, float u2, float v2, 
-                            uint32_t* texture){
+                            upng_t* texture){
     if(y0 > y1)
     {
         float_swap(&w0, &w1);
@@ -340,4 +295,23 @@ void draw_textured_triangle(int x0, int y0, float z0, float w0, float u0, float 
             
         }
     }
+}
+
+
+vec3_t get_triangle_normal(vec4_t vertices[3]){
+    // Backface Culling
+    vec3_t vector_a = vec3_from_vec4(vertices[0]);
+    vec3_t vector_b = vec3_from_vec4(vertices[1]);
+    vec3_t vector_c = vec3_from_vec4(vertices[2]);
+
+    vec3_t vector_ab = vec3_substract(vector_b, vector_a);
+    vec3_normalize(&vector_ab);
+    vec3_t vector_ac = vec3_substract(vector_c, vector_a);
+    vec3_normalize(&vector_ac);
+
+    // Cross product order depends on the coordinate system direction (left handed or right handed)
+    vec3_t normal = vec3_cross(vector_ab, vector_ac);
+    vec3_normalize(&normal);
+
+    return normal;
 }
