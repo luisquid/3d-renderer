@@ -55,10 +55,11 @@ void setup(void) {
 
     initialize_frustum_planes(fovx, fovy, znear, zfar);
 
-    load_mesh("./assets/runway.obj", "./assets/runway.png", vec3_new(1, 1, 1), vec3_new(0, -1.5, +23), vec3_new(0, 0, 0));
-    load_mesh("./assets/f22.obj", "./assets/f22.png", vec3_new(1, 1, 1), vec3_new(0, -1.3, +5), vec3_new(0, -M_PI/2, 0));
-    load_mesh("./assets/efa.obj", "./assets/efa.png", vec3_new(1, 1, 1), vec3_new(-2, -1.3, +9), vec3_new(0, -M_PI/2, 0));
-    load_mesh("./assets/f117.obj", "./assets/f117.png", vec3_new(1, 1, 1), vec3_new(+2, -1.3, +9), vec3_new(0, -M_PI/2, 0));
+    // load_mesh("./assets/runway.obj", "./assets/runway.png", vec3_new(1, 1, 1), vec3_new(0, -1.5, +23), vec3_new(0, 0, 0));
+    // load_mesh("./assets/f22.obj", "./assets/f22.png", vec3_new(1, 1, 1), vec3_new(0, -1.3, +5), vec3_new(0, -M_PI/2, 0));
+    // load_mesh("./assets/efa.obj", "./assets/efa.png", vec3_new(1, 1, 1), vec3_new(-2, -1.3, +9), vec3_new(0, -M_PI/2, 0));
+    // load_mesh("./assets/f117.obj", "./assets/f117.png", vec3_new(1, 1, 1), vec3_new(+2, -1.3, +9), vec3_new(0, -M_PI/2, 0));
+    load_mesh("./assets/cube.obj", "./assets/cube.png", vec3_new(1, 1, 1), vec3_new(+0, 0, 0), vec3_new(0, 0, 0));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -109,37 +110,37 @@ void process_input(void) {
                 break;
             }
             if (event.key.keysym.sym == SDLK_a){
-                set_camera_yaw(get_camera_yaw() - 0.001 * delta_time);
+                set_camera_yaw(get_camera_yaw() - 0.01 * delta_time);
                 break;
             }
             if (event.key.keysym.sym == SDLK_w) {
-                set_forward_velocity(vec3_mul(get_camera_direction(), 0.005 * delta_time)); 
+                set_forward_velocity(vec3_mul(get_camera_direction(), 0.05 * delta_time)); 
                 set_camera_position(vec3_add(get_camera_position(), get_camera_forward_velocity()));
                 break;
             }
             if (event.key.keysym.sym == SDLK_s) {
-                set_forward_velocity(vec3_mul(get_camera_direction(), 0.005 * delta_time)); 
+                set_forward_velocity(vec3_mul(get_camera_direction(), 0.05 * delta_time)); 
                 set_camera_position(vec3_substract(get_camera_position(), get_camera_forward_velocity()));
                 break;
             }
             if (event.key.keysym.sym == SDLK_d){
-                set_camera_yaw(get_camera_yaw() + 0.001 * delta_time);
+                set_camera_yaw(get_camera_yaw() + 0.01 * delta_time);
                 break;
             }
             if (event.key.keysym.sym == SDLK_q){
-                set_camera_position(vec3_new(get_camera_position().x, (get_camera_position().y - 0.003 * delta_time), get_camera_position().z));
+                set_camera_position(vec3_new(get_camera_position().x, (get_camera_position().y - 0.03 * delta_time), get_camera_position().z));
                 break;
             }
             if (event.key.keysym.sym == SDLK_e){
-                set_camera_position(vec3_new(get_camera_position().x, (get_camera_position().y + 0.003 * delta_time), get_camera_position().z));
+                set_camera_position(vec3_new(get_camera_position().x, (get_camera_position().y + 0.03 * delta_time), get_camera_position().z));
                 break;
             }
             if (event.key.keysym.sym == SDLK_r){
-                set_camera_pitch(get_camera_pitch() + 0.001 * delta_time);
+                set_camera_pitch(get_camera_pitch() + 0.01 * delta_time);
                 break;
             }
             if (event.key.keysym.sym == SDLK_f){
-                set_camera_pitch(get_camera_pitch() - 0.001 * delta_time);
+                set_camera_pitch(get_camera_pitch() - 0.01 * delta_time);
                 break;
             }
             break;
@@ -161,6 +162,8 @@ void process_graphics_pipeline_stages(mesh_t* mesh){
         target = vec3_add(get_camera_position(), get_camera_direction());
 
         view_matrix = mat4_look_at(get_camera_position(), target, up_direction);
+
+        mesh->rotation.y += 0.004;
 
         mat4_t scale_matrix = mat4_make_scale(mesh->scale.x, mesh->scale.y, mesh->scale.z);
         mat4_t translation_matrix = mat4_make_translation(mesh->translation.x, mesh->translation.y, mesh->translation.z);
