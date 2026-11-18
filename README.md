@@ -9,3 +9,6 @@ The second one is the Windows implementation with its corresponding Visual Studi
 
 I initially started working on the Windows implementation but moved to Mac/Linux because it was easier for me to setup on the devices I had available at the moment. 
 The Windows implementation is not finished. 
+
+https://github.com/user-attachments/assets/8e2f7b74-6c19-49cc-aa86-a0b9d65f2850
+
